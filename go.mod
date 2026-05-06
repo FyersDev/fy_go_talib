@@ -1,3 +1,3 @@
-module github.com/markcheno/go-talib
+module github.com/FyersDev/fy_go_talib
 
-go 1.23.2
+go 1.24.4
