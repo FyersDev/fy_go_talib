@@ -7,6 +7,7 @@ Licensed under terms of MIT license (see LICENSE)
 package talib
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -840,5 +841,89 @@ func TestSuperTrend(t *testing.T) {
 	for i := start; i < len(line); i++ {
 		fmt.Printf("%4d | %.4f | %.0f | %.0f\n",
 			i, line[i], dir[i], breakout[i])
+	}
+}
+
+func TestPivot(t *testing.T) {
+	open := 100.0
+	high := 110.0
+	low := 90.0
+	close := 100.0
+	currOpen := 101.0
+
+	tests := []struct {
+		name      string
+		pivotType PivotType
+		expected  PivotLevel
+	}{
+		{
+			name:      "Classic",
+			pivotType: PivotTypeClassic,
+			expected: PivotLevel{
+				Pivot: PivotTypeClassic,
+				R1:    110.00, R2: 120.00, R3: 140.00, R4: 160.00, R5: 180.00,
+				S1: 90.00, S2: 80.00, S3: 60.00, S4: 40.00, S5: 20.00,
+				P: 100.00,
+			},
+		},
+		{
+			name:      "Fibonacci",
+			pivotType: PivotTypeFibonacci,
+			expected: PivotLevel{
+				Pivot: PivotTypeFibonacci,
+				R1:    107.64, R2: 112.36, R3: 120.00, R4: 127.64, R5: 132.36,
+				S1: 92.36, S2: 87.64, S3: 80.00, S4: 72.36, S5: 67.64,
+				P: 100.00,
+			},
+		},
+		{
+			name:      "Camarilla",
+			pivotType: PivotTypeCamarilla,
+			expected: PivotLevel{
+				Pivot: PivotTypeCamarilla,
+				R1:    101.83, R2: 103.67, R3: 105.50, R4: 111.00, R5: 122.00,
+				S1: 98.17, S2: 96.33, S3: 94.50, S4: 89.00, S5: 78.00,
+				P: 100.00,
+			},
+		},
+		{
+			name:      "Woodie",
+			pivotType: PivotTypeWoodie,
+			expected: PivotLevel{
+				Pivot: PivotTypeWoodie,
+				R1:    111.00, R2: 120.50, R3: 131.00, R4: 0.00, R5: 0.00,
+				S1: 91.00, S2: 80.50, S3: 71.00, S4: 0.00, S5: 0.00,
+				P: 100.50,
+			},
+		},
+		{
+			name:      "DeMark",
+			pivotType: PivotTypeDeMark,
+			expected: PivotLevel{
+				Pivot: PivotTypeDeMark,
+				R1:    110.00, R2: 0.00, R3: 0.00, R4: 0.00, R5: 0.00,
+				S1: 90.00, S2: 0.00, S3: 0.00, S4: 0.00, S5: 0.00,
+				P: 100.00,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Pivot(open, high, low, close, currOpen, tt.pivotType)
+			if err != nil {
+				t.Fatalf("Pivot(%s) returned error: %v", tt.pivotType, err)
+			}
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("unexpected pivot output for %s:\n got: %+v\nwant: %+v", tt.pivotType, got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestPivot_UnsupportedType(t *testing.T) {
+	_, err := Pivot(100, 110, 90, 100, 101, PivotType("InvalidType"))
+	if !errors.Is(err, ErrUnsupportedPivotType) {
+		t.Fatalf("expected ErrUnsupportedPivotType, got %v", err)
 	}
 }
