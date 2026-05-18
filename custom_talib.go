@@ -73,6 +73,93 @@ func SuperTrend(high, low, close []float64, period int, mult float64) ([]float64
 	return out, dir, breakout
 }
 
+// Vwap computes the Volume Weighted Average Price.
+// A new session is indicated by passing a boolean slice `newSession`
+// where newSession[i] == true means reset the VWAP at bar i.
+// If newSession is nil, no reset is ever applied (continuous VWAP).
+//
+// Inputs : high, low, close []float64  — OHLC bars
+//
+//	volume            []float64  — bar volume
+//	newSession        []bool     — true at the first bar of each session
+//
+// Outputs: vwap
+// []float64  — VWAP line
+func Vwap(open, high, low, close, volume []float64, src PriceSource) []float64 {
+	n := len(close)
+
+	if len(high) < n {
+		n = len(high)
+	}
+	if len(low) < n {
+		n = len(low)
+	}
+	if len(open) < n {
+		n = len(open)
+	}
+	if len(volume) < n {
+		n = len(volume)
+	}
+
+	out := make([]float64, n)
+
+	var cumPV, cumVol float64
+
+	for i := 0; i < n; i++ {
+
+		price := GetPrice(open, high, low, close, i, src)
+		vol := volume[i]
+
+		if vol <= 0 {
+			if i > 0 {
+				out[i] = out[i-1]
+			}
+			continue
+		}
+
+		cumPV += price * vol
+		cumVol += vol
+
+		if cumVol != 0 {
+			out[i] = cumPV / cumVol
+		}
+	}
+
+	return out
+}
+
+// / OBV calculates On-Balance Volume.
+// Returns cumulative OBV line.
+func OBV(close, volume []float64) []float64 {
+	n := len(close)
+
+	if len(volume) < n {
+		n = len(volume)
+	}
+
+	out := make([]float64, n)
+
+	if n == 0 {
+		return out
+	}
+
+	obv := volume[0]
+	out[0] = obv
+
+	for i := 1; i < n; i++ {
+
+		if close[i] > close[i-1] {
+			obv += volume[i]
+		} else if close[i] < close[i-1] {
+			obv -= volume[i]
+		}
+
+		out[i] = obv
+	}
+
+	return out
+}
+
 type PivotType string
 
 const (
