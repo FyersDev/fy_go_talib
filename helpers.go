@@ -40,3 +40,13 @@ func GetPrice(open, high, low, close []float64, i int, src PriceSource) float64 
 		return (high[i] + low[i] + close[i]) / 3.0
 	}
 }
+
+type PivotType string
+
+const (
+	PivotTypeClassic   PivotType = "Classic"
+	PivotTypeFibonacci PivotType = "Fibonacci"
+	PivotTypeCamarilla PivotType = "Camarilla"
+	PivotTypeWoodie    PivotType = "Woodie"
+	PivotTypeDeMark    PivotType = "DeMark"
+)

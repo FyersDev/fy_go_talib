@@ -1,7 +1,6 @@
 package talib
 
 import (
-	"errors"
 	"math"
 )
 
@@ -160,20 +159,7 @@ func OBV(close, volume []float64) []float64 {
 	return out
 }
 
-type PivotType string
-
-const (
-	PivotTypeClassic   PivotType = "Classic"
-	PivotTypeFibonacci PivotType = "Fibonacci"
-	PivotTypeCamarilla PivotType = "Camarilla"
-	PivotTypeWoodie    PivotType = "Woodie"
-	PivotTypeDeMark    PivotType = "DeMark"
-)
-
-var ErrUnsupportedPivotType = errors.New("unsupported pivot type")
-
 type PivotLevel struct {
-	Pivot PivotType
 	R1    float64
 	R2    float64
 	R3    float64
@@ -194,7 +180,7 @@ func roundFloat(val float64, precision uint) float64 {
 
 // Pivot computes pivot levels for the selected pivot type.
 // Timeframe (daily/weekly/etc.) is decided by the OHLC inputs fed to this method.
-func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) (PivotLevel, error) {
+func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotLevel {
 	p := (high + low + close) / 3
 	p2 := (high + low + 2*currOpen) / 4
 
@@ -210,7 +196,6 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) (Pivot
 	switch pivotType {
 	case PivotTypeClassic:
 		return PivotLevel{
-			Pivot: PivotTypeClassic,
 			R1:    roundFloat((2*p)-low, 2),
 			R2:    roundFloat(p+(high-low), 2),
 			R3:    roundFloat(p+2*(high-low), 2),
@@ -222,10 +207,9 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) (Pivot
 			S4:    roundFloat(p-3*(high-low), 2),
 			S5:    roundFloat(p-4*(high-low), 2),
 			P:     roundFloat(p, 2),
-		}, nil
+		}
 	case PivotTypeFibonacci:
 		return PivotLevel{
-			Pivot: PivotTypeFibonacci,
 			R1:    roundFloat(p+0.382*(high-low), 2),
 			R2:    roundFloat(p+0.618*(high-low), 2),
 			R3:    roundFloat(p+(high-low), 2),
@@ -237,10 +221,9 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) (Pivot
 			S4:    roundFloat(p-1.382*(high-low), 2),
 			S5:    roundFloat(p-1.618*(high-low), 2),
 			P:     roundFloat(p, 2),
-		}, nil
+		}
 	case PivotTypeCamarilla:
 		return PivotLevel{
-			Pivot: PivotTypeCamarilla,
 			R1:    roundFloat(close+(1.1*(high-low))/12, 2),
 			R2:    roundFloat(close+(1.1*(high-low))/6, 2),
 			R3:    roundFloat(close+(1.1*(high-low))/4, 2),
@@ -252,10 +235,9 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) (Pivot
 			S4:    roundFloat(close-(1.1*(high-low))/2, 2),
 			S5:    roundFloat(close-1.1*(high-low), 2),
 			P:     roundFloat(close, 2),
-		}, nil
+		}
 	case PivotTypeWoodie:
 		return PivotLevel{
-			Pivot: PivotTypeWoodie,
 			R1:    roundFloat((2*p2)-low, 2),
 			R2:    roundFloat(p2+(high-low), 2),
 			R3:    roundFloat(high+2*(p2-low), 2),
@@ -263,15 +245,14 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) (Pivot
 			S2:    roundFloat(p2-(high-low), 2),
 			S3:    roundFloat(low-2*(high-p2), 2),
 			P:     roundFloat(p2, 2),
-		}, nil
+		}
 	case PivotTypeDeMark:
 		return PivotLevel{
-			Pivot: PivotTypeDeMark,
 			P:     roundFloat(x/4, 2),
 			R1:    roundFloat((x/2)-low, 2),
 			S1:    roundFloat((x/2)-high, 2),
-		}, nil
+		}
 	default:
-		return PivotLevel{}, ErrUnsupportedPivotType
+		return PivotLevel{}
 	}
 }
