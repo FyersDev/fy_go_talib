@@ -842,3 +842,43 @@ func TestSuperTrend(t *testing.T) {
 			i, line[i], dir[i], breakout[i])
 	}
 }
+func TestPivotDailyClassic(t *testing.T) {
+	// OHLC values for NSE:NIFTY50-INDEX at time stamp: 19 may 15:29 pm for 1D resolution and from to set to 18 may 15:29pm and 19 may 15:29pm
+	// timestamps := []int64{1779062400, 1779148800}
+	opens := []float64{23482.2, 23675.3}
+	highs := []float64{23695.65, 23782.3}
+	lows := []float64{23317.1, 23587.2}
+	closes := []float64{23649.95, 23618}
+	// volumes   := []int64{391968426, 441953184}
+
+	pivot := Pivot(opens[0], highs[0], lows[0], closes[0], opens[1], PivotTypeClassic)
+
+	fmt.Printf("P:  %.2f\nR1: %.2f  S1: %.2f\nR2: %.2f  S2: %.2f\nR3: %.2f  S3: %.2f\nR4: %.2f  S4: %.2f\nR5: %.2f  S5: %.2f\n",
+		pivot.P,
+		pivot.R1, pivot.S1,
+		pivot.R2, pivot.S2,
+		pivot.R3, pivot.S3,
+		pivot.R4, pivot.S4,
+		pivot.R5, pivot.S5,
+	)
+}
+func TestPivotWeeklyClassic(t *testing.T) {
+	// OHLC values for NSE:NIFTY50-INDEX at time stamp: 19 may 15:29 pm for 1W resolution and from, to set to 5 may 15:29pm and 19 may 15:29pm
+	// timestamps := []int64{1777852800, 1778457600}
+	opens := []float64{24063.55, 23970.1}
+	highs := []float64{24482.1, 23997.45}
+	lows := []float64{23882.05, 23262.55}
+	closes := []float64{24176.15, 23618}
+	// volumes   := []int64{1988066544, 2532538750}
+
+	pivot := Pivot(opens[0], highs[0], lows[0], closes[0], opens[1], PivotTypeClassic)
+
+	fmt.Printf("P:  %.2f\nR1: %.2f  S1: %.2f\nR2: %.2f  S2: %.2f\nR3: %.2f  S3: %.2f\nR4: %.2f  S4: %.2f\nR5: %.2f  S5: %.2f\n",
+		pivot.P,
+		pivot.R1, pivot.S1,
+		pivot.R2, pivot.S2,
+		pivot.R3, pivot.S3,
+		pivot.R4, pivot.S4,
+		pivot.R5, pivot.S5,
+	)
+}

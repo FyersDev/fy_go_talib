@@ -159,7 +159,7 @@ func OBV(close, volume []float64) []float64 {
 	return out
 }
 
-type PivotLevel struct {
+type PivotLevels struct {
 	R1    float64
 	R2    float64
 	R3    float64
@@ -180,7 +180,7 @@ func roundFloat(val float64, precision uint) float64 {
 
 // Pivot computes pivot levels for the selected pivot type.
 // Timeframe (daily/weekly/etc.) is decided by the OHLC inputs fed to this method.
-func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotLevel {
+func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotLevels {
 	p := (high + low + close) / 3
 	p2 := (high + low + 2*currOpen) / 4
 
@@ -195,7 +195,7 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotL
 
 	switch pivotType {
 	case PivotTypeClassic:
-		return PivotLevel{
+		return PivotLevels{
 			R1:    roundFloat((2*p)-low, 2),
 			R2:    roundFloat(p+(high-low), 2),
 			R3:    roundFloat(p+2*(high-low), 2),
@@ -209,7 +209,7 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotL
 			P:     roundFloat(p, 2),
 		}
 	case PivotTypeFibonacci:
-		return PivotLevel{
+		return PivotLevels{
 			R1:    roundFloat(p+0.382*(high-low), 2),
 			R2:    roundFloat(p+0.618*(high-low), 2),
 			R3:    roundFloat(p+(high-low), 2),
@@ -223,7 +223,7 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotL
 			P:     roundFloat(p, 2),
 		}
 	case PivotTypeCamarilla:
-		return PivotLevel{
+		return PivotLevels{
 			R1:    roundFloat(close+(1.1*(high-low))/12, 2),
 			R2:    roundFloat(close+(1.1*(high-low))/6, 2),
 			R3:    roundFloat(close+(1.1*(high-low))/4, 2),
@@ -237,7 +237,7 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotL
 			P:     roundFloat(close, 2),
 		}
 	case PivotTypeWoodie:
-		return PivotLevel{
+		return PivotLevels{
 			R1:    roundFloat((2*p2)-low, 2),
 			R2:    roundFloat(p2+(high-low), 2),
 			R3:    roundFloat(high+2*(p2-low), 2),
@@ -247,12 +247,12 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotL
 			P:     roundFloat(p2, 2),
 		}
 	case PivotTypeDeMark:
-		return PivotLevel{
+		return PivotLevels{
 			P:     roundFloat(x/4, 2),
 			R1:    roundFloat((x/2)-low, 2),
-			S1:    roundFloat((x/2)-high, 2),
+			S1:    roundFloat((x/2)-high, 2),	
 		}
 	default:
-		return PivotLevel{}
+		return PivotLevels{}
 	}
 }
