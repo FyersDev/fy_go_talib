@@ -256,3 +256,32 @@ func Pivot(open, high, low, close, currOpen float64, pivotType PivotType) PivotL
 		return PivotLevels{}
 	}
 }
+
+// PivotLevelSeries returns the selected pivot level for each bar.
+// At index i >= 1, prior bar OHLC (i-1) and current open (i) feed scalar Pivot.
+// out[0] is 0 (warmup). Output length matches the minimum OHLC slice length.
+// Supports Classic, Fibonacci, Camarilla, Woodie, and DeMark via scalar Pivot.
+func PivotLevelSeries(open, high, low, close []float64, pivotType PivotType, level PivotLevel) []float64 {
+	n := len(close)
+	if len(high) < n {
+		n = len(high)
+	}
+	if len(low) < n {
+		n = len(low)
+	}
+	if len(open) < n {
+		n = len(open)
+	}
+
+	out := make([]float64, n)
+	if n < 2 {
+		return out
+	}
+
+	for i := 1; i < n; i++ {
+		levels := Pivot(open[i-1], high[i-1], low[i-1], close[i-1], open[i], pivotType)
+		out[i] = PivotLevelValue(levels, level)
+	}
+
+	return out
+}
